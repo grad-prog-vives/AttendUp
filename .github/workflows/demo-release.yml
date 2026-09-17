@@ -24,17 +24,26 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
-  # - name: Test
-  #  run: dotnet test --no-build --verbosity normal
+    # - name: Test
+    #   run: dotnet test --no-build --verbosity normal
 
     - name: Publish
       run: dotnet publish --configuration Release --output ./publish
 
-    - name: FTP Deploy
-      uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+    # - name: FTP Deploy
+    #   uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+    #   with:
+    #     server: ${{ secrets.FTP_SERVER }}
+    #     username: ${{ secrets.FTP_USERNAME }}
+    #     password: ${{ secrets.FTP_PASSWORD }}
+    #     local-dir: ./publish/
+    #     protocol: ftps
+
+    - name: Deploy via SFTP
+      uses: Dylan700/sftp-upload-action@latest
       with:
-        server: ${{ secrets.FTP_SERVER }}
+        server: ${{ secrets.FTP_SERVER}}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./publish/
-        protocol: ftps
+        port: 21
+        uploads: ./publish/ => /
