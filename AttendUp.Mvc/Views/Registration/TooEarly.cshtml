@@ -1,0 +1,43 @@
+﻿@model AttendUp.Mvc.ViewModels.NotFoundViewModel
+
+@{
+    var b = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
+}
+<style>
+    :root {
+        --orange: @(b?.ButtonColor ?? "#F58220");
+        --bg: @(b?.BackgroundColor ?? "#F5F5F5");
+    }
+</style>
+
+<div class="login-page">
+    <div class="login-wrap">
+        <div class="login-logo-wrap">
+            <img src="@(ViewBag.Branding is AttendUp.Mvc.Models.Setting b2 && b2.LogoPath != null ? b2.LogoPath : "/images/logo.png")" alt="AttendUp logo" class="login-logo-img" />
+        </div>
+
+        <div class="login-card" style="text-align: center; padding: 40px 20px;">
+            <h2 style="color: #e67e22;">Nog even geduld...</h2>
+            <p class="lead">De registratie voor de training van vandaag is nog niet geopend.</p>
+
+            <div style="background: rgba(0,0,0,0.05); border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <p style="margin-bottom: 5px; font-weight: bold;">Registratie venster:</p>
+                <p>Je kunt je aanmelden vanaf <strong>@ViewBag.OpeningTime uur</strong>.</p>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <a href="@Url.Action("Index", "Registration")" class="btn btn-primary" style="text-decoration: none; display: inline-block;">
+                    Pagina vernieuwen
+                </a>
+            </div>
+        </div>
+
+        @if (b != null && !string.IsNullOrEmpty(b.EventBannerPath))
+        {
+            <div class="event-banner-wrap">
+                <img src="@b.EventBannerPath?v=@DateTime.Now.Ticks" alt="Event banner" class="event-banner-img" />
+            </div>
+        }
+
+    </div>
+</div>

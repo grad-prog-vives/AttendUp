@@ -1,0 +1,133 @@
+﻿@* 1. MODEL DEFINITION: Tells the view that it expects a list (IEnumerable) of SystemLog objects from the database *@
+@model IEnumerable<AttendUp.Mvc.Models.SystemLog>
+
+@{
+    /* Defines the title of the page and safely retrieves state data from the ViewBag
+       with fallback values if they are null. */
+    ViewData["Title"] = "Systeemlogs";
+    string currentLogLevel = ViewBag.LogLevel ?? "";
+    string currentSearch = ViewBag.Search ?? "";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+}
+
+<div class="container-fluid py-4 px-4 px-md-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4" style="margin-left: 15px; margin-top: 10px;">
+        <h2 class="h3 mb-0" style="color: #ff9800;">
+            Systeemlogs <span class="badge bg-dark fs-6 vertical-align-middle" style="color: #ffffff;">SuperAdmin</span>
+        </h2>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body bg-light">
+            @* DYNAMIC URL GENERATION: @Url.Action automatically builds the correct URL pointing to the "Logs" method inside the "AdminController" *@
+            <form method="get" action="@Url.Action("Logs", "Admin")" class="row g-3 align-items-end" style="margin: 15px;">
+
+                <div class="col-md-3 pe-md-4">
+                    <label class="form-label small fw-bold text-secondary">Log Niveau</label>
+                    <select name="logLevel" class="form-select">
+                        <option value="">-- Alle Niveaus --</option>
+                        @* INLINE CONDITIONAL ATTRIBUTE: selected="@(...)" checks if the current filter matches this option. If true, it automatically adds the HTML 'selected' attribute so the dropdown remembers the user's choice after reloading *@
+                        <option value="Information" selected="@(currentLogLevel == "Information")">Information</option>
+                        <option value="Warning" selected="@(currentLogLevel == "Warning")">Warning</option>
+                        <option value="Error" selected="@(currentLogLevel == "Error")">Error</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 pe-md-4">
+                    <label class="form-label small fw-bold text-secondary">Zoeken</label>
+                    @* VALUE BINDING: Fills the input field with the text the user previously searched for, so it doesn't disappear *@
+                    <input type="text" name="search" class="form-control" placeholder="Zoek op bericht of user..." value="@currentSearch" />
+                </div>
+
+                <div class="col-md-5 d-flex gap-2 justify-content-md-end" style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-funnel-fill me-1"></i> Filteren
+                    </button>
+                    <a href="@Url.Action("Logs", "Admin")" class="btn btn-outline-secondary px-4">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 15%;">Datum (UTC)</th>
+                        <th style="width: 10%;">Niveau</th>
+                        <th style="width: 15%;">Gebruiker</th>
+                        <th style="width: 15%;">IP-Adres</th>
+                        <th style="width: 45%;">Bericht</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @* EMPTY CHECK: !Model.Any() checks if the list of logs is completely empty *@
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+                                Geen systeemlogs gevonden die voldoen aan de criteria.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @* Loops through every individual 'log' inside the 'Model' list *@
+                        foreach (var log in Model)
+                        {
+                            @* TERNARY OPERATOR: A compact if/else statement that chooses Bootstrap colors based on the severity of the log (Red for Error, Yellow for Warning, Blue for Info) *@
+                            string badgeClass = log.LogLevel == "Error" ? "bg-danger text-white" : (log.LogLevel == "Warning" ? "bg-warning text-dark" : "bg-info text-dark");
+
+                            <tr>
+                                @* DATE FORMATTING: Converts the DateTime object into a clean, human-readable format (Day/Month/Year Hour:Minute:Second) *@
+                                <td class="text-secondary small">@log.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+
+                                @* DYNAMIC CLASS INSERTION: Inserts the badgeClass variable we created above into the HTML class *@
+                                <td><span class="badge @badgeClass px-2 py-1.5 font-monospace">@log.LogLevel</span></td>
+
+                                @* 10. If log.Username is null (e.g., user wasn't logged in), it displays "Anoniem" instead *@
+                                <td class="fw-semibold">@(log.Username ?? "Anoniem")</td>
+
+                                <td class="font-monospace text-secondary small">@log.IpAddress</td>
+                                <td>
+                                    <div class="text-dark fw-medium" style="padding-left: 5px;">@log.Message</div>
+
+                                    @* CONDITIONAL ERROR DISPLAY: Only renders this section if there is actually an error/exception stacktrace available *@
+                                    @if (!string.IsNullOrEmpty(log.Exception))
+                                    {
+                                        <div class="mt-2">
+                                            @* <pre> keeps the formatting/newlines of the original error code *@
+                                            <pre class="bg-dark text-light p-3 rounded small font-monospace mb-0" style="max-height: 200px; overflow-y: auto; font-size: 0.825rem;">@log.Exception</pre>
+                                        </div>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @* PAGINATION BLOCK: Only shows the page numbers if there is actually more than 1 page in total *@
+    @if (totalPages > 1)
+    {
+        <nav class="d-flex justify-content-center mt-4">
+            <ul class="pagination shadow-sm">
+                @* FOR LOOP FOR PAGES: Generates a button for each page (1, 2, 3...) *@
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    @* ACTIVE PAGE HIGHLIGHT: Adds the Bootstrap class "active" to the current page so the user knows where they are *@
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        @* COMPLEX URL GENERATION: Generates a link to the Admin/Logs action, but attaches the current filters (logLevel, search) AND the clicked page number 'i' as URL parameters *@
+                        <a class="page-link" href="@Url.Action("Logs", "Admin", new { logLevel = currentLogLevel, search = currentSearch, page = i })">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

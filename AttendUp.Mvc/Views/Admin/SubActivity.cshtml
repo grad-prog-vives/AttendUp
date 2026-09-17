@@ -1,0 +1,74 @@
+﻿@model List<AttendUp.Mvc.Models.SubActivity>
+
+@{
+    if (TempData["ErrorMessage"] is string msg)
+    {
+        ViewData.ModelState.AddModelError(string.Empty, msg);
+    }
+    ViewBag.Title = "Subactiviteiten";
+}
+
+<main class="main">
+    <div class="page-header">
+        <h1>Subactiviteiten</h1>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+            </div>
+        }
+
+        <a asp-controller="SubActivity" asp-action="SubActivityCreate" class="btn btn-primary btn-sm">+ Nieuwe subactiviteit</a>
+    </div>
+
+    <section class="section-card">
+        <div class="section-card__head">
+            <h3>Alle subactiviteiten</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Naam</th>
+                    <th>Status</th>
+                    <th>Acties</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model)
+                {
+                    <tr>
+                        <td>@s.Name</td>
+                        <td>
+                            @if (s.IsActive)
+                            {
+                                <span class="badge badge-high">Actief</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-low">Inactief</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-controller="SubActivity" asp-action="SubActivityEdit" asp-route-id="@s.ID" class="edit-link">Bewerken</a>
+                            &nbsp;|&nbsp;
+                            <form asp-controller="SubActivity" asp-action="SubActivityToggle" asp-route-id="@s.ID" method="post" style="display:inline;">
+                                <button type="submit" class="activity-tag" style="background:none;border:none;cursor:pointer;padding:0;">
+                                    @(s.IsActive ? "Deactiveren" : "Activeren")
+                                </button>
+                            </form>
+                            &nbsp;|&nbsp;
+                            <form asp-controller="SubActivity" asp-action="SubActivityDelete" asp-route-id="@s.ID" method="post" style="display:inline;">
+                                <button type="submit" onclick="return confirm('Subactiviteit verwijderen?')"
+                                        style="background:none;border:none;cursor:pointer;color:var(--red);font-weight:600;font-size:13px;padding:0;">Verwijderen</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</main>

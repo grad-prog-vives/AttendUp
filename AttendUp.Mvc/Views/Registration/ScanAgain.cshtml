@@ -1,0 +1,55 @@
+@model AttendUp.Mvc.ViewModels.NotFoundViewModel
+@{
+    ViewData["Title"] = "Scan opnieuw";
+    var b = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
+}
+<style>
+    :root {
+        --orange: @(b?.ButtonColor ?? "#F58220");
+        --bg: @(b?.BackgroundColor ?? "#F5F5F5");
+    }
+</style>
+
+<div class="login-page">
+    <div class="login-wrap">
+
+        <div class="login-logo-wrap">
+            <img src="@(ViewBag.Branding is AttendUp.Mvc.Models.Setting b2 && b2.LogoPath != null ? b2.LogoPath : "/images/logo.png")" alt="AttendUp logo" class="login-logo-img" />
+        </div>
+
+        <div class="login-card" style="text-align:center;">
+            <div class="success-icon" style="background: var(--yellow-bg);">
+                <span style="font-size: 30px;">&#128247;</span>
+            </div>
+            <h2 class="success-title">Scan de QR-code</h2>
+            <p class="success-text">Scan de QR-code op jouw locatie om je te registreren.</p>
+        </div>
+
+        @if (Model != null && Model.HasNextTraining)
+        {
+            <div class="login-card" style="text-align:center; margin-top: 1rem;">
+                <div class="success-icon" style="background: var(--primary-bg, #e8f4fd);">
+                    <span style="font-size: 30px;">&#128197;</span>
+                </div>
+                <h2 class="success-title">Volgende training</h2>
+                <p class="success-text">
+                    <strong>@Model.NextTrainingDate!.Value.ToString("dddd d MMMM yyyy", new System.Globalization.CultureInfo("nl-BE"))</strong>
+                </p>
+                <p class="success-text">
+                    &#128336; @Model.NextTrainingStartTime!.Value.ToString(@"hh\:mm") &ndash; @Model.NextTrainingEndTime!.Value.ToString(@"hh\:mm")
+                </p>
+            </div>
+        }
+        else if (Model != null && !Model.HasNextTraining)
+        {
+            <div class="login-card" style="text-align:center; margin-top: 1rem;">
+                <div class="success-icon" style="background: var(--yellow-bg);">
+                    <span style="color: var(--yellow); font-size: 30px;">&#128197;</span>
+                </div>
+                <h2 class="success-title">Geen toekomstige trainingen</h2>
+                <p class="success-text">Er zijn momenteel nog geen nieuwe trainingen ingepland.</p>
+            </div>
+        }
+
+    </div>
+</div>

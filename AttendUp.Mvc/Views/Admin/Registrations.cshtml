@@ -1,0 +1,182 @@
+﻿@model AttendUp.Mvc.ViewModels.AdminRegistrationIndexViewModel
+@{
+    ViewBag.Title = "Registraties";
+}
+
+<main class="main">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <div>
+        <h1>Overzicht Registraties</h1>
+        <p class="lead">Hieronder vind je de registraties gegroepeerd per training.</p>
+    </div>
+    <div>
+        @{
+            bool isFiltering = ViewBag.ShowingOnlyDuplicates ?? false;
+        }
+        <a asp-action="Registrations" asp-route-showOnlyDuplicates="@(!isFiltering)" class="btn btn-outline btn-sm" style="background:@(isFiltering ? "grey" : "red"); color:white;">
+            @(isFiltering ? "TOON ALLE REGISTRATIES" : "TOON ALLEEN FOUTIEVE REGISTRATIES")
+        </a>
+    </div>
+
+    @if (!Model.TrainingGroups.Any())
+    {
+        <div class="dashboard-card">
+            <p>Er zijn nog geen trainingen of registraties gevonden.</p>
+        </div>
+    }
+    else
+    {
+        <div class="training-accordion">
+            @foreach (var group in Model.TrainingGroups)
+            {
+                <div class="training-accordion__item">
+
+                    <button class="training-accordion__header"
+                            onclick="toggleAccordion(this)"
+                            type="button">
+
+                        <div class="training-accordion__header-left">
+                            <span class="training-accordion__title">@group.TrainingTitle</span>
+                           @if (group.Registrations.Any(r => r.IsDuplicate))
+                            {
+                                <span class="badge" style="background:red">&#9888; Let op: Dubbele Naam</span>
+                            }
+                            <span class="training-accordion__date">
+                                @group.TrainingDate.ToString("dddd d MMMM yyyy", new System.Globalization.CultureInfo("nl-BE"))
+                            </span>
+                        </div>
+
+                        <div class="training-accordion__header-right">
+                            <span class="training-accordion__count">
+                                @group.TotalRegistrations registratie@(group.TotalRegistrations != 1 ? "s" : "")
+                            </span>
+                            <span class="training-accordion__chevron">&#8250;</span>
+                        </div>
+                    </button>
+
+                    <div class="training-accordion__body">
+
+                        <div class="training-info-panel">
+                            <div class="training-info-panel__grid">
+                                <div class="training-info-panel__item">
+                                    <span class="training-info-panel__label">&#128337; Tijdstip</span>
+                                    <span class="training-info-panel__value">
+                                        @group.StartTime.ToString(@"hh\:mm") – @group.EndTime.ToString(@"hh\:mm")
+                                    </span>
+                                </div>
+                                <div class="training-info-panel__item">
+                                    <span class="training-info-panel__label">&#128101; Totaal aanwezig</span>
+                                    <span class="training-info-panel__value">@group.TotalRegistrations leden</span>
+                                </div>
+                                <div class="training-info-panel__item">
+                                    <span class="training-info-panel__label">&#9989; Actieve subactiviteiten</span>
+                                    <div class="training-info-panel__badges">
+                                        @if (group.ActiveSubActivities.Any())
+                                        {
+                                            @foreach (var sub in group.ActiveSubActivities)
+                                            {
+                                                <span class="badge">@sub</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="training-info-panel__none">Geen</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Registraties lijst -->
+                        @if (!group.Registrations.Any())
+                        {
+                            <p class="training-accordion__empty">Nog niemand geregistreerd voor deze training.</p>
+                        }
+                        else
+                        {
+                            <ul class="reg-list">
+                                @foreach (var reg in group.Registrations)
+                                {
+                                    <li class="reg-list__item @(reg.IsDuplicate ? "duplicate-warning" : "")">
+                                        <div class="reg-list__left">
+                                            <div class="reg-list__top">
+                                                <span class="name">@reg.FirstName @reg.LastName</span>
+                                                <span class="reg-list__koos">koos voor</span>
+                                                <span class="badge">@reg.SubActivityName</span>
+                                                @if (reg.IsDuplicate)
+                                                {
+                                                        <span class="badge" style="background:red">&#9888; Let op: Dubbele Naam</span>   
+                                                }
+                                                <small class="reg-list__time">@reg.RegisteredAt.ToString("dd-MM-yyyy") | @reg.RegisteredAt.ToString("HH:mm")</small>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <a asp-action="EditRegistration"
+                                               asp-route-id="@reg.ID"
+                                               class="btn btn-outline btn-sm reg-list__edit"
+                                               title="Registratie corrigeren">
+                                                <span class="reg-list__edit-label">&#9998; Edit</span>
+                                                <span class="reg-list__edit-icon">&#9998;</span>
+                                            </a>
+                                            @if (reg.IsDuplicate)
+                                            {
+                                                <form asp-action="DeleteRegistration" asp-controller="Admin" method="post" class=" btn btn-outline btn-sm reg-list__edit" style="background:red">
+                                                    <input type="hidden" name="id" value="@reg.ID" />
+                                                    <span onclick="this.closest('form').submit()" class="reg-list__edit-label">&#10006; Verwijder</span>
+                                                    <span onclick="this.closest('form').submit()" class="reg-list__edit-icon">&#10006;</span>
+                                                </form>
+                                            }
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    @if (Model.TotalPages > 1)
+    {
+        <div class="pagination-container">
+            @if (Model.HasPreviousPage)
+            {
+                <a asp-action="Registrations"
+                   asp-route-page="@(Model.CurrentPage - 1)"
+                   class="btn btn-primary">&#8592; Vorige</a>
+            }
+            else
+            {
+                <button class="btn btn-disabled" disabled>&#8592; Vorige</button>
+            }
+
+            <span>Pagina @Model.CurrentPage van @Model.TotalPages</span>
+
+            @if (Model.HasNextPage)
+            {
+                <a asp-action="Registrations"
+                   asp-route-page="@(Model.CurrentPage + 1)"
+                   class="btn btn-primary">Volgende &#8594;</a>
+            }
+            else
+            {
+                <button class="btn btn-disabled" disabled>Volgende &#8594;</button>
+            }
+        </div>
+    }
+</main>
+
+<script>
+    function toggleAccordion(btn) {
+        const item = btn.closest('.training-accordion__item');
+        const isOpen = item.classList.contains('is-open');
+        item.classList.toggle('is-open', !isOpen);
+    }
+</script>

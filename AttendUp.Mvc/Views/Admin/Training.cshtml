@@ -1,0 +1,74 @@
+﻿@model IEnumerable<AttendUp.Mvc.Models.Training>
+@{
+    ViewBag.Title = "Training";
+}
+
+<div class="main">
+    <section class="section-card">
+        <div class="section-card__head">
+            <h3>Opkomende trainingen</h3>
+            <div>
+                <button class="btn btn-primary btn-sm" onclick="window.location.href='/Admin/Training/Create'">+ Training aanmaken</button>
+                <button class="btn btn-primary btn-sm" onclick="window.location.href='/Admin/Training/SeasonPlanning'">Jaarplanning aanmaken</button>
+                <button class="btn btn-primary btn-sm" onclick="window.location.href='/Admin/SubActivity'">Sub activiteiten beheren</button>
+            </div>
+        </div>
+        @if (TempData["SeasonResult"] != null)
+        {
+            <div class="alert alert-success mt-2">@TempData["SeasonResult"]</div>
+        }
+        <table>
+            <thead>
+                <tr>
+                    @* <th>Id</th> *@
+                    <th>Titel</th>
+                    <th>Status</th>
+                    <th>Datum</th>
+                    <th>Start</th>
+                    <th>Einde</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+
+            <tbody>
+
+            @foreach (var t in Model.Where(p => p.Date >= DateTime.Today))
+                {
+                    <tr class=@(t.Date == DateTime.Today ? "badge-med" : "")>
+                        <td>@t.Title</td>
+                        <td>
+                            @if (t.IsActive)
+                            {
+                                <span class="badge badge-high">Actief</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-low">Inactief</span>
+                            }
+                        </td>
+                            <td>@t.Date.ToString("dd/MM/yyyy")</td>
+                            <td>@t.StartTime.ToString(@"hh\:mm")</td>
+                            <td>@t.EndTime.ToString(@"hh\:mm")</td>
+                            <td>
+                                <a asp-action="TrainingEdit" asp-route-id="@t.ID" class="edit-link">
+                                    Bewerken
+                                </a>
+                                &nbsp;|&nbsp;
+                                <form asp-action="TrainingToggle" asp-route-id="@t.ID" method="post" style="display:inline;">
+                                    <button type="submit" class="activity-tag" style="background:none;border:none;cursor:pointer;padding:0;">
+                                        @(t.IsActive ? "Deactiveren" : "Activeren")
+                                    </button>
+                                </form>
+                                &nbsp;|&nbsp;
+                                <form asp-action="Delete" asp-route-id="@t.ID" method="post" style="display:inline;">
+                                    <button type="submit" onclick="return confirm('Training verwijderen? Dit verwijdert ook alle registraties.')"
+                                            style="background:none;border:none;cursor:pointer;color:var(--red);font-weight:600;font-size:13px;padding:0;">Verwijderen</button>
+                                </form>
+                            </td>
+                        </tr>
+            }
+            </tbody>
+        </table>
+    </section>
+</div>

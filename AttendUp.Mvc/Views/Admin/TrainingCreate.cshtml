@@ -1,0 +1,124 @@
+@model AttendUp.Mvc.ViewModels.TrainingViewModel
+@{
+    if (Model.Date == default) Model.Date = DateTime.Today;
+    ViewBag.Title = "Aanmaken training";
+}
+
+<div class="main training-create-page">
+    @if (Model.ID == 0)
+    {
+        <form class="training-modal" method="post" asp-action="Create" asp-controller="Training">
+            <div class="training-modal__header">
+                <h2 class="training-modal__title">Nieuwe training</h2>
+                <button type="button" class="training-modal__close" aria-label="Sluiten" onclick="window.location.href='/Admin/Training';">&times;</button>
+            </div>
+
+            <div class="field">
+                <label>Titel</label>
+                <input type="text" class="input" asp-for="Title" required />
+            </div>
+
+            <div class="field">
+                <label for="datum">Datum</label>
+                <input type="date" class="input" asp-for="Date" required />
+            </div>
+
+            <div class="field">
+                <label>Startuur</label>
+                <input type="time" class="input" asp-for="StartTime" required />
+            </div>
+
+            <div class="field">
+                <label>Einduur</label>
+                <input type="time" class="input" asp-for="EndTime" required />
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <p>@error.ErrorMessage</p>
+                    }
+                </div>
+            }
+
+            <input type="hidden" asp-for="ID" />
+
+            <div class="field">
+                <label>Subactiviteiten</label>
+                @foreach (var s in Model.AllSubActivities)
+                {
+                    bool check = true;
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                        <input type="checkbox" name="SelectedSubActivityIDs" value="@s.ID" id="sub_@s.ID" checked="@check" />
+                        <label for="sub_@s.ID" style="font-weight:normal;">@s.Name</label>
+                    </div>
+                }
+            </div>
+
+            <div class="training-modal__actions">
+                <button type="button" class="btn btn-outline" onclick="window.location.href='/Admin/Training';">Annuleer</button>
+                <button type="submit" class="btn btn-primary">Maak Training</button>
+            </div>
+        </form>
+    }
+    else
+    {
+        <form class="training-modal" method="post" asp-action="TrainingEdit" asp-controller="Training" asp-route-id="@Model.ID">
+            <div class="training-modal__header">
+                <h2 class="training-modal__title">Training bewerken</h2>
+                <button type="button" class="training-modal__close" aria-label="Sluiten" onclick="window.location.href='/Admin/Training';">&times;</button>
+            </div>
+
+            <div class="field">
+                <label>Titel</label>
+                <input type="text" class="input" asp-for="Title" required />
+            </div>
+
+            <div class="field">
+                <label for="datum">Datum</label>
+                <input type="date" class="input" asp-for="Date" required />
+            </div>
+
+            <div class="field">
+                <label>Startuur</label>
+                <input type="time" class="input" asp-for="StartTime" required />
+            </div>
+
+            <div class="field">
+                <label>Einduur</label>
+                <input type="time" class="input" asp-for="EndTime" required />
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <p>@error.ErrorMessage</p>
+                    }
+                </div>
+            }
+
+            <input type="hidden" asp-for="ID" />
+
+            <div class="field">
+                <label>Subactiviteiten</label>
+                @foreach (var s in Model.AllSubActivities)
+                {
+                    bool check = Model.SelectedSubActivityIDs != null && Model.SelectedSubActivityIDs.Contains(s.ID);
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                        <input type="checkbox" name="SelectedSubActivityIDs" value="@s.ID" id="sub_@s.ID" checked="@check" />
+                        <label for="sub_@s.ID" style="font-weight:normal;">@s.Name</label>
+                    </div>
+                }
+            </div>
+
+            <div class="training-modal__actions">
+                <button type="button" class="btn btn-outline" onclick="window.location.href='/Admin/Training';">Annuleer</button>
+                <button type="submit" class="btn btn-primary">Opslaan</button>
+            </div>
+        </form>
+    }
+</div>

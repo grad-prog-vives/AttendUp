@@ -1,0 +1,54 @@
+﻿@model IEnumerable<AttendUp.Mvc.Models.AuditLog>
+
+@{
+    ViewBag.Title = "Logboek";
+}
+
+<main class="main">
+    <h1><i class="bi bi-journal-text"></i> Logboek</h1>
+    <section class="section-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 20%;">Datum & Tijd</th>
+                                <th style="width: 25%;">Gebruiker</th>
+                                <th style="width: 15%;">Actie</th>
+                                <th style="width: 40%;">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        Er zijn nog geen acties gelogd.
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var log in Model)
+                                {
+                                    <tr>
+                                        <td>@log.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@log.User.Replace(".", " ")</td>
+                                        <td>
+                                            <span>@log.Action</span>
+                                        </td>
+                                        <td>@log.Details</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

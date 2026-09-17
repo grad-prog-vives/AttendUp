@@ -1,0 +1,69 @@
+﻿@{
+    var act = ViewContext.RouteData.Values["action"]?.ToString();
+    var branding = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
+    var logoSrc = branding?.LogoPath ?? "/images/logo.png";
+}
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+</head>
+<body>
+    <button class="sidebar-toggle" onclick="toggleSidebar()">&#9776;</button>
+
+    <div class="dashboard">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <img src="@logoSrc" alt="AttendUp logo" class="sidebar-logo" />
+            </div>
+            <ul class="nav">
+                <li><b class="sidebar-header">Algemeen</b></li>
+                <li><a href="/">&#127968; Thuis</a></li>
+                <li><b class="sidebar-header">Beheer</b></li>
+                <li><a href="/Admin" class="@(act == "Index" ? "active" : "")">&#128202; Dashboard</a></li>
+                <li><a href="/Admin/Training" class="@(act == "Training" ? "active" : "")">&#127947; Trainingen</a></li>
+                <li><a href="/Admin/SubActivity" class="@(act == "SubActivity" ? "active" : "")">&#127954; Subactiviteiten</a></li>
+                <li><a href="/Admin/Location" class="@(act == "Location" ? "active" : "")">&#128205; Locaties</a></li>
+                <li><a href="/Admin/Statistics" class="@(act == "Statistics" || act == "Export" ? "active" : "")">&#128200; Statistieken</a></li>
+                <li><a href="/Admin/Registrations" class="@(act == "Registrations" ? "active" : "")">&#128220; Registraties</a></li>
+
+                @* I am adding the new button for account management here so the superadmin can navigate directly to the page *@
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <li><a href="/Admin/Audit" class="@(act == "Audit" ? "active" : "")">&#128211; Logboek</a></li>
+                    <li><a href="/Admin/Logs" class="@(act == "Logs" ? "active" : "")">&#128373; IP-logs</a></li>
+                    <li><a href="/Admin/Users" class="@(act == "Users" ? "active" : "")">&#128101; Accountbeheer</a></li>
+                    <li><a href="/Admin/Settings" class="@(act == "Settings" ? "active" : "")">&#129520; Instellingen</a></li>
+                }
+            </ul>
+            <div class="sidebar-account-panel">
+                <div class="user-info-label">
+                    <span class="user-icon">&#128100;</span>
+                    <div class="user-details">
+                        <span class="user-title">Ingelogd als</span>
+                        @{
+                            string fullName = User.Identity?.Name ?? "Gast";
+                            if (!string.IsNullOrEmpty(User.Identity?.Name) && User.Identity.Name.Contains('.'))
+                            {
+                                var parts = User.Identity.Name.Split('.');
+                                if (parts.Length >= 2)
+                                {
+                                    var firstName = char.ToUpper(parts[0][0]) + parts[0].Substring(1).ToLower();
+                                    var lastName = char.ToUpper(parts[1][0]) + parts[1].Substring(1).ToLower();
+                                    fullName = $"{firstName} {lastName}";
+                                }
+                            }
+                        }
+                        <span class="user-name">@fullName</span>
+                    </div>
+                </div>
+
+                <form asp-controller="Account" asp-action="Logout" method="post" id="logout" class="logout-form">
+                    <button type="submit" class="logout-btn">&#9166; Afmelden</button>
+                </form>
+            </div>
+        </aside>
+        @RenderBody()
+    </div>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+</body>

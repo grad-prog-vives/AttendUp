@@ -1,0 +1,76 @@
+@model AttendUp.Mvc.ViewModels.ExportViewModel
+@{
+    ViewBag.Title = "Exporteren";
+}
+
+<div class="main">
+    <div class="page-header">
+        <h1>Exporteren</h1>
+    </div>
+
+    <section class="section-card">
+        <div class="section-card__head">
+            <h3>Filters</h3>
+        </div>
+
+        <form method="get" asp-action="Export">
+            <div class="export-filters">
+                <div class="filter-group">
+                    <label for="start">Van</label>
+                    <input type="date" id="start" name="start" class="input no-icon"
+                           value="@Model.Start?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="filter-group">
+                    <label for="end">Tot</label>
+                    <input type="date" id="end" name="end" class="input no-icon"
+                           value="@Model.End?.ToString("yyyy-MM-dd")" />
+                </div>
+                <button type="submit" class="btn btn-dark btn-sm">Toepassen</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="section-card">
+        <div class="section-card__head">
+            <h3>Trainingen</h3>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <label class="select-all-label">
+                    <input type="checkbox" id="selectAll" /> Alles selecteren
+                </label>
+                <button type="submit" form="exportForm" class="btn btn-primary btn-sm">&#11015; CSV Downloaden</button>
+            </div>
+        </div>
+
+        <form id="exportForm" method="post" asp-action="ExportCsv">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"></th>
+                        <th>Titel</th>
+                        <th>Datum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var training in Model.Trainings)
+                    {
+                        <tr>
+                            <td><input type="checkbox" name="trainingIds" value="@training.ID" /></td>
+                            <td>@training.Title</td>
+                            <td>@training.Date.ToString("dd/MM/yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="export-actions">
+                <button type="submit" class="btn btn-primary btn-sm">&#11015; CSV Downloaden</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<script>
+    document.getElementById('selectAll').addEventListener('change', function () {
+        document.querySelectorAll('input[name="trainingIds"]').forEach(cb => cb.checked = this.checked);
+    });
+</script>

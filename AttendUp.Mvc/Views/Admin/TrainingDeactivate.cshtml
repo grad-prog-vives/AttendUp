@@ -1,0 +1,34 @@
+﻿@model AttendUp.Mvc.Models.Training
+
+@{
+    ViewBag.Title = "Deactiveren training";
+}
+
+<div class="main training-create-page">
+    <form class="training-modal" method="post" asp-action="TrainingDeactivate" asp-controller="Training" asp-route-id="@Model.ID">
+        <div class="training-modal__header">
+            <h2 class="training-modal__title">Geef reden in</h2>
+            <button type="button" class="training-modal__close" onclick="window.location.href='/Admin/Training';">&times;</button>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger" style="margin-top: 16px;">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p style="margin:0">@error.ErrorMessage</p>
+                }
+            </div>
+        }
+
+        <div class="field">
+            <label>Reden</label>
+            <input type="text" class="input no-icon" name="reason" placeholder="Reden deactivatie" required />
+        </div>
+
+        <div class="training-modal__actions">
+            <button type="button" class="btn btn-outline" onclick="window.location.href='/Admin/Training';">Annuleer</button>
+            <button type="submit" class="btn btn-primary">Deactiveren</button>
+        </div>
+    </form>
+</div>

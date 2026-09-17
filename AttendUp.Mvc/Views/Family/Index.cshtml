@@ -1,0 +1,137 @@
+﻿@model List<AttendUp.Mvc.Models.Family>
+
+@{
+    Layout = "_Layout";
+    var b = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
+}
+
+<style>
+    :root {
+        --orange: @(b?.ButtonColor ?? "#F58220");
+        --bg: @(b?.BackgroundColor ?? "#F5F5F5");
+        --orange-dark: @(b?.ButtonColor ?? "#F58220");
+    }
+</style>
+
+<div class="family-dashboard">
+
+    <main class="family-main">
+        <div class="family-container">
+            <!-- HEADER -->
+            <div class="family-page-header">
+                <h1>Dashboard Overview</h1>
+
+                <a asp-controller="Family"
+                   asp-action="Create"
+                   class="btn btn-primary btn-sm">
+                    + Nieuwe Familie
+                </a>
+            </div>
+
+            <!-- STATS -->
+            <div class="welcome-grid">
+
+                <div class="family-stat-card family-stat-card--welcome">
+                    <p class="welcome-title">Welkom terug!</p>
+                    <p class="welcome-sub">
+                        Je beheert momenteel @Model.Count families.
+                    </p>
+                </div>
+
+                <div class="family-stat-card">
+                    <div class="family-stat-head">
+                        <span>Actieve Families</span>
+                        <span class="ico">👨‍👩‍👧‍👦</span>
+                    </div>
+
+                    <p class="family-stat-value">@Model.Count</p>
+                </div>
+
+            </div>
+
+            <!-- FAMILIES -->
+            <section class="section-card">
+
+                <div class="section-card__head">
+                    <h3>Jouw Families</h3>
+                </div>
+
+                <div class="family-cards">
+
+                    @foreach (var family in Model)
+                    {
+                        <div class="family-stat-card family-card">
+
+                            <div class="family-card__top">
+                                <span class="ico">👨‍👩‍👧‍👦</span>
+                                <div class="avatars">
+                                    @foreach (var member in family.FamilyMembers.Take(2))
+                                    {
+                                        var FirstName = char.ToUpper(@member.FirstName[0]);
+                                        var LastName = char.ToUpper(@member.LastName[0]);
+                                        <span class="avatar">
+                                            @FirstName@LastName
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <p class="family-title">
+                                @family.FamilyName
+                            </p>
+
+                            <p class="family-meta">
+                                @family.FamilyMembers.Count leden
+                            </p>
+
+                            <a asp-controller="Family"
+                               asp-action="Edit"
+                               asp-route-id="@family.FamilyId"
+                               class="btn btn-primary btn-sm family-btn">
+                                Bewerken
+                            </a>
+
+                            <form asp-controller="Family"
+                                  asp-action="Delete"
+                                  asp-route-id="@family.FamilyId"
+                                  method="post"
+                                  onsubmit="return confirm('Weet je zeker dat je @family.FamilyName wilt verwijderen? Dit kan niet ongedaan worden gemaakt.');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit"
+                                        class="btn btn-sm family-btn"
+                                        style="background:none;border:1px solid #dc3545;color:#dc3545;">
+                                    Verwijderen
+                                </button>
+                            </form>
+
+                        </div>
+                    }
+
+                    <!-- ADD CARD -->
+                    <div class="family-stat-card family-card family-card--add">
+
+                        <span class="add-icon">+</span>
+
+                        <p class="family-title">Nieuwe Familie</p>
+
+                        <p class="family-meta">
+                            Voeg een nieuw huishouden toe aan je beheer.
+                        </p>
+
+                        <a asp-controller="Family"
+                           asp-action="Create"
+                           class="btn btn-primary btn-sm family-btn">
+                            Start Nu
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>

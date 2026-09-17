@@ -1,0 +1,36 @@
+@model AttendUp.Mvc.Models.Location
+
+@{
+    ViewBag.Title = "Locatie bewerken";
+}
+
+<div class="main training-create-page">
+    <form class="training-modal" method="post" asp-controller="Location" asp-action="LocationEdit" asp-route-id="@Model.Id">
+        <div class="training-modal__header">
+            <h2 class="training-modal__title">Locatie bewerken</h2>
+            <button type="button" class="training-modal__close" onclick="window.location.href='/Admin/Location';">&times;</button>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger" style="margin-top: 16px;">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p style="margin:0">@error.ErrorMessage</p>
+                }
+            </div>
+        }
+
+        <input type="hidden" asp-for="Id" />
+
+        <div class="field">
+            <label>Naam</label>
+            <input type="text" class="input no-icon" asp-for="Name" required />
+        </div>
+
+        <div class="training-modal__actions">
+            <button type="button" class="btn btn-outline" onclick="window.location.href='/Admin/Location';">Annuleer</button>
+            <button type="submit" class="btn btn-primary">Opslaan</button>
+        </div>
+    </form>
+</div>

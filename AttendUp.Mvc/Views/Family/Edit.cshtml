@@ -1,0 +1,158 @@
+﻿@model AttendUp.Mvc.ViewModels.FamilyEditViewModel
+
+@{
+    Layout = "_Layout";
+    var b = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
+}
+
+<style>
+    :root {
+        --orange: @(b?.ButtonColor ?? "#F58220");
+        --bg: @(b?.BackgroundColor ?? "#F5F5F5");
+        --orange-dark: @(b?.ButtonColor ?? "#F58220");
+    }
+</style>
+
+<div class="training-create-page">
+
+    <form class="training-modal"
+          style="max-width:480px;"
+          asp-controller="Family"
+          asp-action="Edit"
+          asp-route-id="@Model.FamilyId"
+          method="post">
+
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="FamilyId" />
+
+        <div asp-validation-summary="All" class="text-danger" style="font-size:13px;margin-bottom:8px;"></div>
+
+        <div class="training-modal__header">
+            <h2 class="training-modal__title">Familie bewerken</h2>
+            <button type="button"
+                    class="training-modal__close"
+                    aria-label="Sluiten"
+                    onclick="window.location.href='/Family';">
+                &times;
+            </button>
+        </div>
+
+        <p style="color:var(--muted);font-size:13px;margin:12px 0 20px;">
+            Pas de familienaam aan of beheer de gezinsleden.
+        </p>
+
+        <div class="familie-name-block"
+             style="display:flex;align-items:flex-start;gap:14px;background:#f5f5f5;border-radius:10px;padding:16px;margin-bottom:20px;">
+
+            <div style="width:48px;height:48px;background:var(--orange-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;color:var(--orange);">
+                🏠
+            </div>
+
+            <div class="field" style="flex:1;margin:0;">
+                <label asp-for="FamilyName"></label>
+                <input asp-for="FamilyName"
+                       class="input no-icon"
+                       placeholder="Voer hier je familienaam in" />
+                <span asp-validation-for="FamilyName" class="text-danger"></span>
+            </div>
+
+        </div>
+
+        <p style="font-size:14px;font-weight:700;margin:0 0 12px;">Gezinsleden</p>
+
+        <div id="member-list" style="display:flex;flex-direction:column;gap:10px;">
+
+            @for (int i = 0; i < Model.Members.Count; i++)
+            {
+                <div class="member-row" id="member-row-@i">
+                    <input type="hidden" name="Members[@i].FamilyMemberId" value="@Model.Members[i].FamilyMemberId" />
+                    <input type="hidden" name="Members[@i].IsDeleted" value="false" id="deleted-@i" />
+                    <span class="avatar" style="font-size:14px;background:var(--bg);">👤</span>
+                    <div class="member-inputs">
+                        <input type="text" name="Members[@i].FirstName" value="@Model.Members[i].FirstName" class="input no-icon" placeholder="Voornaam" />
+                        <input type="text" name="Members[@i].LastName" value="@Model.Members[i].LastName" class="input no-icon" placeholder="Achternaam" />
+                    </div>
+                    <button type="button"
+                            onclick="removeExisting(@i)"
+                            class="btn btn-danger btn-sm"
+                            style="background-color:#dc3545;border:none;padding:6px 12px;border-radius:4px;">
+                        🗑
+                    </button>
+                </div>
+            }
+
+        </div>
+
+        <button type="button"
+                onclick="addMember()"
+                style="background:none;border:none;color:var(--orange);font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;padding:0;font-family:inherit;display:flex;align-items:center;gap:6px;">
+            + Voeg nog een lid toe
+        </button>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="window.location.href='/Family'">
+                Annuleren
+            </button>
+            <button type="submit" class="btn btn-primary">
+                Opslaan →
+            </button>
+        </div>
+
+        <div style="margin-top:16px;text-align:center;border-top:1px solid #eee;padding-top:14px;">
+            <button type="button"
+                    onclick="confirmDelete()"
+                    class="btn btn-outline"
+                    style="border-color:#dc3545;color:#dc3545;width:100%;">
+                Familie verwijderen
+            </button>
+        </div>
+
+    </form>
+
+    <form id="delete-form"
+          asp-controller="Family"
+          asp-action="Delete"
+          asp-route-id="@Model.FamilyId"
+          method="post"
+          style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <script>
+            let newIndex = @Model.Members.Count;
+
+            function confirmDelete() {
+                if (confirm('Weet je zeker dat je deze familie wilt verwijderen? Dit kan niet ongedaan worden gemaakt.'))
+                    document.getElementById('delete-form').submit();
+            }
+
+            function removeExisting(i) {
+                document.getElementById('member-row-' + i).style.display = 'none';
+                document.getElementById('deleted-' + i).value = 'true';
+            }
+
+            function addMember() {
+                const list = document.getElementById('member-list');
+
+                const div = document.createElement('div');
+                div.className = 'member-row';
+
+                div.innerHTML =
+                    '<span class="avatar" style="font-size:14px;background:var(--bg);">👤</span>' +
+                    '<div class="member-inputs">' +
+                        '<input type="text" name="Members[' + newIndex + '].FirstName" class="input no-icon" placeholder="Voornaam" />' +
+                        '<input type="text" name="Members[' + newIndex + '].LastName" class="input no-icon" placeholder="Achternaam" />' +
+                    '</div>' +
+                    '<input type="hidden" name="Members[' + newIndex + '].IsDeleted" value="false" />' +
+                    '<button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm" style="background-color:#dc3545;border:none;padding:6px 12px;border-radius:4px;">🗑</button>';
+
+                list.appendChild(div);
+                newIndex++;
+            }
+    </script>
+
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

@@ -1,0 +1,258 @@
+﻿@model AttendUp.Mvc.Models.Setting
+@{
+    ViewBag.Title = "Instellingen";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<main class="main">
+    <h1>Instellingen</h1>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert-success">@TempData["Success"]</div>
+    }
+
+    <form method="post" asp-action="Settings" enctype="multipart/form-data">
+        <input type="hidden" name="ID" value="@Model.ID" />
+        <div class="settings-grid">
+            <div class="settings-left">
+                <div class="settings-card">
+                    <h3>Registratiepagina kleuren</h3>
+                    <p class="settings-hint">Deze kleuren worden toegepast op de publieke registratiepagina.</p>
+
+                    <div class="colors-row">
+                        <div class="field">
+                            <label>Achtergrondkleur</label>
+                            <div class="color-row">
+                                <input type="color" name="_BackgroundColor" value="@Model.BackgroundColor" class="color-picker" data-target="background" />
+                                <input type="text" name="BackgroundColor" value="@Model.BackgroundColor" class="input no-icon color-hex" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Knopkleur</label>
+                            <div class="color-row">
+                                <input type="color" name="_ButtonColor" value="@Model.ButtonColor" class="color-picker" data-target="button" />
+                                <input type="text" name="ButtonColor" value="@Model.ButtonColor" class="input no-icon color-hex" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="colors-row">
+                        <div class="field field--logo">
+                            <label>Logo</label>
+                            <input type="file" name="logoFile" accept="image/*" class="input no-icon" id="logoFile" />
+                            <small class="field-hint">Laat leeg om het huidige logo te behouden.</small>
+                        </div>
+
+                        <div class="field field--logo">
+                            <label>Eventbanner</label>
+                            <input type="file" name="eventBannerFile" accept="image/*" class="input no-icon" id="eventBannerFile" />
+                            <small class="field-hint">Laat leeg om de huidige banner te behouden.</small>
+                            @if (Model.EventBannerPath != null)
+                            {
+                                <img src="@Model.EventBannerPath?v=@DateTime.Now.Ticks" alt="Huidige eventbanner" id="current-banner-preview" />
+                                <button type="button" class="btn btn-secondary btn-sm" id="remove-banner-btn">
+                                    Eventbanner verwijderen
+                                </button>
+                                <input type="hidden" name="resetEventBanner" id="resetEventBanner" value="false" />
+                            }
+                        </div>
+                    </div>
+
+                    <hr />
+                    <h3>Standaardkleuren aanpassen</h3>
+                    <p class="settings-hint">Dit zijn de kleuren waarnaar "Reset naar standaard" terugkeert.</p>
+
+                    <div class="colors-row">
+                        <div class="field">
+                            <label>Standaard achtergrondkleur</label>
+                            <div class="color-row">
+                                <input type="color" name="_DefaultBackgroundColor" value="@Model.DefaultBackgroundColor" class="color-picker" data-target="none" />
+                                <input type="text" name="DefaultBackgroundColor" value="@Model.DefaultBackgroundColor" class="input no-icon color-hex" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Standaard knopkleur</label>
+                            <div class="color-row">
+                                <input type="color" name="_DefaultButtonColor" value="@Model.DefaultButtonColor" class="color-picker" data-target="none" />
+                                <input type="text" name="DefaultButtonColor" value="@Model.DefaultButtonColor" class="input no-icon color-hex" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button type="submit" class="btn btn-primary btn-sm">Opslaan</button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="reset-settings"
+                                data-default-button="@Model.DefaultButtonColor"
+                                data-default-background="@Model.DefaultBackgroundColor">
+                            Reset naar standaard
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Systeem & Tijdsinstellingen</h3>
+                    <p class="settings-hint">Beheer hier de tijdsvensters en de sessiebeveiliging van de applicatie.</p>
+
+                    <div class="field">
+                        <label for="RegistrationWindowMinutes">Tijdsvenster registratie (minuten)</label>
+                        <div class="window-input-row">
+                            <input type="number" id="RegistrationWindowMinutes" name="RegistrationWindowMinutes"
+                                   value="@Model.RegistrationWindowMinutes" min="0" max="480" class="input no-icon window-input" />
+                        </div>
+                        <small class="field-hint">Standaard: 30 minuten.</small>
+                    </div>
+
+                    <div class="field" style="margin-top: 1.5rem;">
+                        <label for="BoardSessionTimeoutMinutes">Sessie-timeout bestuursleden (minuten)</label>
+                        <div class="window-input-row">
+                            <input type="number" id="BoardSessionTimeoutMinutes" name="BoardSessionTimeoutMinutes"
+                                   value="@Model.BoardSessionTimeoutMinutes" min="1" max="480" class="input no-icon window-input" />
+                        </div>
+                        <small class="field-hint">Kies een waarde tussen 1 en 480 minuten (8 uur). Standaard: 60 minuten.</small>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button type="submit" class="btn btn-primary btn-sm">Opslaan</button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="reset-window-btn">
+                            Reset naar 30 min
+                        </button>
+                    </div>
+                </div>
+             </div>
+    
+            <div class="settings-preview">
+                <h3>Voorbeeld</h3>
+                <div class="settings-preview-box" id="preview-box">
+                    <div class="preview-logo-wrap">
+                        <img src="@(Model.LogoPath ?? "/images/logo.png")" alt="AttendUp logo" class="preview-logo-img" id="prev-logo" />
+                    </div>
+                    <div class="preview-card">
+                        <p class="preview-label" id="prev-text">Invullen aanwezigheid</p>
+                        <div class="preview-field-mock"></div>
+                        <div class="preview-field-mock preview-field-mock--last"></div>
+                        <div class="preview-btn" id="prev-btn">Bevestigen</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group form-check my-3" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+        <input type="checkbox" asp-for="StoreIpAddresses" class="form-check-input" id="StoreIpAddresses" />
+        <label class="form-check-label" for="StoreIpAddresses" style="display: inline-block; margin-left: 0.5rem; cursor: pointer;">
+            <strong>IP-adressen opslaan bij registraties</strong> <br />
+            <small class="text-muted" style="color: #6c757d; display: block; margin-top: 0.25rem;">
+                Schakel dit in om misbruik te kunnen onderzoeken. Laat dit uitgeschakeld om te voldoen aan strikte privacyrichtlijnen (GDPR/AVG) wanneer er geen direct risico is.
+            </small>
+        </label>
+    </div>
+    </div>
+    </div>
+    </form>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const resetBtn = document.getElementById('reset-settings');
+        const DEFAULTS = {
+            ButtonColor: resetBtn.dataset.defaultButton,
+            BackgroundColor: resetBtn.dataset.defaultBackground,
+            LogoPath: "/images/logo.png"
+        };
+
+        function apply(color, target) {
+            if (target === "button") {
+                document.getElementById('prev-btn').style.background = color;
+            }
+            if (target === "background") {
+                document.getElementById('preview-box').style.background = color;
+            }
+        }
+
+        function setValue(name, value) {
+            const picker = document.querySelector(`input[name="_${name}"][type="color"]`);
+            const hex = document.querySelector(`input[name="${name}"].color-hex`);
+            if (picker) picker.value = value;
+            if (hex) hex.value = value;
+            apply(value, picker?.dataset.target);
+        }
+
+        document.querySelectorAll('.color-row').forEach(row => {
+            const picker = row.querySelector('.color-picker');
+            const hex = row.querySelector('.color-hex');
+            const target = picker.dataset.target;
+
+            apply(picker.value, target);
+
+            picker.addEventListener('input', (e) => {
+                const hexName = picker.name.replace('_', '');
+                const linkedHex = document.querySelector(`input[name="${hexName}"].color-hex`);
+                if (linkedHex) linkedHex.value = e.target.value;
+                apply(e.target.value, target);
+            });
+
+            hex.addEventListener('input', (e) => {
+                if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) {
+                    const linkedPicker = document.querySelector(`input[name="_${hex.name}"][type="color"]`);
+                    if (linkedPicker) linkedPicker.value = e.target.value;
+                    apply(e.target.value, target);
+                }
+            });
+        });
+
+        document.getElementById('logoFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    document.getElementById('prev-logo').src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (!confirm("Reset naar standaard?")) return;
+
+            setValue("ButtonColor", DEFAULTS.ButtonColor);
+            setValue("BackgroundColor", DEFAULTS.BackgroundColor);
+            document.getElementById('prev-logo').src = DEFAULTS.LogoPath;
+
+            const settingsForm = document.querySelector('form[action*="Settings"]');
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'resetLogo';
+            input.value = 'true';
+            settingsForm.appendChild(input);
+
+            settingsForm.submit();
+        });
+
+        const removeBannerBtn = document.getElementById('remove-banner-btn');
+        if (removeBannerBtn) {
+            removeBannerBtn.addEventListener('click', () => {
+                if (!confirm("Eventbanner verwijderen?")) return;
+                document.getElementById('resetEventBanner').value = 'true';
+                document.getElementById('current-banner-preview')?.remove();
+                removeBannerBtn.textContent = 'Banner wordt verwijderd bij opslaan';
+                removeBannerBtn.disabled = true;
+            });
+        }
+
+        document.getElementById('reset-window-btn').addEventListener('click', () => {
+            document.getElementById('RegistrationWindowMinutes').value = 30;
+
+            const settingsForm = document.querySelector('form[action*="Settings"]');
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'resetWindow';
+            input.value = 'true';
+            settingsForm.appendChild(input);
+
+            settingsForm.submit();
+        });
+
+    });
+</script>

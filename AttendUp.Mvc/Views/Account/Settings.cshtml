@@ -1,0 +1,66 @@
+@model AttendUp.Mvc.ViewModels.AccountSettingsViewModel
+@{
+    Layout = "_Layout";
+}
+@{
+    var b = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
+}
+<style>
+    :root {
+        --orange: @(b?.ButtonColor ?? "#F58220");
+        --bg: @(b?.BackgroundColor ?? "#F5F5F5");
+        --orange-dark: @(b?.ButtonColor ?? "#F58220");
+    }
+</style>
+<div class="container px-4 my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-4">
+
+            <div class="login-card">
+                <h2 class="mb-4">Accountinstellingen</h2>
+
+                @if (ViewBag.Success != null)
+                {
+                    <div class="alert alert-success">@ViewBag.Success</div>
+                }
+
+                <form asp-action="Settings" method="post">
+                    <h5 class="mb-3">Naam aanpassen</h5>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="field">
+                        <label asp-for="FirstName" class="form-label fw-bold">Voornaam</label>
+                        <input asp-for="FirstName" class="input no-icon" type="text" autocomplete="given-name" required />
+                        <span asp-validation-for="FirstName" class="text-danger small d-block mt-1"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="LastName" class="form-label fw-bold">Achternaam</label>
+                        <input asp-for="LastName" class="input no-icon" type="text" autocomplete="family-name" required />
+                        <span asp-validation-for="LastName" class="text-danger small d-block mt-1"></span>
+                    </div>
+
+                    <div class="d-grid mb-4">
+                        <button type="submit" class="btn btn-primary">Opslaan</button>
+                    </div>
+                </form>
+
+                @if (!User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
+                {
+                    <hr />
+
+                    <h5 class="mb-3 text-danger">Account verwijderen</h5>
+                    <p class="text-muted small">Dit kan niet ongedaan worden gemaakt. Je account en alle bijbehorende gegevens worden permanent verwijderd.</p>
+
+                    <form asp-action="DeleteAccount" method="post"
+                          onsubmit="return confirm('Weet je zeker dat je je account wilt verwijderen? Dit kan niet ongedaan worden gemaakt.');">
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger">Account verwijderen</button>
+                        </div>
+                    </form>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>

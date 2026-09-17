@@ -1,0 +1,32 @@
+﻿@{
+    var b = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
+}
+<style>
+    :root {
+        --orange: @(b?.ButtonColor ?? "#F58220");
+        --bg: @(b?.BackgroundColor ?? "#F5F5F5");
+    }
+</style>
+
+<div class="login-page">
+    <div class="login-wrap">
+
+        <div class="login-logo-wrap">
+            <img src="@(ViewBag.Branding is AttendUp.Mvc.Models.Setting b2 && b2.LogoPath != null ? b2.LogoPath : "/images/logo.png")" alt="AttendUp logo" class="login-logo-img" />
+        </div>
+
+        <div class="login-card">
+            <div class="success-icon">✅</div>
+            <h2 class="success-title">Registratie gelukt!</h2>
+            <p class="success-text">Je inschrijving is opgeslagen.</p>
+        </div>
+
+        @if (b != null && !string.IsNullOrEmpty(b.EventBannerPath))
+        {
+            <div class="event-banner-wrap">
+                <img src="@b.EventBannerPath?v=@DateTime.Now.Ticks" alt="Event banner" class="event-banner-img" />
+            </div>
+        }
+
+    </div>
+</div>

@@ -1,0 +1,21 @@
+﻿
+@model AttendUp.Mvc.ViewModels.RegistrationViewModel
+
+<h2>Registratie</h2>
+
+<form method="post" action="/Registration/Create">
+
+    <input type="hidden" name="TrainingID" value="@Model.TrainingID" />
+
+    <input type="text" name="FirstName" placeholder="Voornaam" required />
+    <input type="text" name="LastName" placeholder="Achternaam" required />
+
+    <select name="SubActivityID" required>
+        @foreach (var item in Model.SubActivities)
+        {
+            <option value="@item.ID">@item.Name</option>
+        }
+    </select>
+
+    <button type="submit">Registreer</button>
+</form>

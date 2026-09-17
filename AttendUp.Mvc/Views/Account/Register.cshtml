@@ -1,0 +1,62 @@
+@model AttendUp.Mvc.ViewModels.RegisterViewModel
+@{
+    Layout = "_Layout";
+}
+@{
+    var b = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
+}
+<style>
+    :root {
+        --orange: @(b?.ButtonColor ?? "#F58220");
+        --bg: @(b?.BackgroundColor ?? "#F5F5F5");
+        --orange-dark: @(b?.ButtonColor ?? "#F58220");
+    }
+</style>
+<div class="container px-4 my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-4">
+
+            <form asp-action="Register" method="post" class="login-card">
+                <h2 class="mb-4 text-center text-md-start">Account aanmaken</h2>
+                <p class="lead">Vul je gegevens in.</p>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="field">
+                    <label asp-for="FirstName" class="form-label fw-bold">Voornaam</label>
+                    <input asp-for="FirstName" class="input no-icon" type="text" autocomplete="given-name" required />
+                    <span asp-validation-for="FirstName" class="text-danger small d-block mt-1"></span>
+                </div>
+
+                <div class="field">
+                    <label asp-for="LastName" class="form-label fw-bold">Achternaam</label>
+                    <input asp-for="LastName" class="input no-icon" type="text" autocomplete="family-name" required />
+                    <span asp-validation-for="LastName" class="text-danger small d-block mt-1"></span>
+                </div>
+
+                <div class="field">
+                    <label asp-for="Email" class="form-label fw-bold">Email</label>
+                    <input asp-for="Email" class="input no-icon" type="email" autocomplete="email" autocapitalize="none" autocorrect="off" required />
+                    <span asp-validation-for="Email" class="text-danger small d-block mt-1"></span>
+                </div>
+
+                <div class="field">
+                    <label asp-for="Password" class="form-label fw-bold">Wachtwoord</label>
+                    <input asp-for="Password" class="input no-icon" type="password" autocomplete="new-password" required />
+                    <span asp-validation-for="Password" class="text-danger small d-block mt-1"></span>
+                </div>
+
+                <div class="field">
+                    <label asp-for="ConfirmPassword" class="form-label fw-bold">Bevestig wachtwoord</label>
+                    <input asp-for="ConfirmPassword" class="input no-icon" type="password" autocomplete="new-password" required />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small d-block mt-1"></span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Registreren</button>
+                    <a asp-action="Login" class="btn btn-link text-center mt-2 py-2">Al een account? Inloggen</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

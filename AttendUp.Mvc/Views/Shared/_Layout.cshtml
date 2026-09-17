@@ -1,0 +1,59 @@
+@{
+    var branding = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
+    var logoSrc = branding?.LogoPath ?? "/images/logo.png";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AttendUp.Mvc.styles.css" asp-append-version="true" />
+
+</head>
+<body>
+    <header>
+        <nav class="public-nav">
+            <a href="/"><img src="@logoSrc" alt="AttendUp logo" class="login-logo-img-nav" /></a>
+
+            <button class="public-nav__hamburger" id="nav-hamburger" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="public-nav__links" id="nav-links">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a href="/Family" class="public-nav__link">Familie</a>
+                    @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin"))
+                    {
+                        <a href="/Admin" class="public-nav__link">Admin</a>
+                    } 
+                    else 
+                    {
+                        <a href="/Account/Settings" class="public-nav__link">Mijn account</a>
+                    }
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline;">
+                        <button type="submit" class="public-nav__link public-nav__link--btn">Uitloggen</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="/Account/Login" class="public-nav__link">Inloggen</a>
+                }
+            </div>
+        </nav>
+    </header>
+
+    @RenderBody()
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

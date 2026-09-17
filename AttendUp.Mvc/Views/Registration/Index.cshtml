@@ -1,0 +1,98 @@
+@model AttendUp.Mvc.ViewModels.RegistrationViewModel
+
+@{
+    var b = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
+}
+<style>
+    :root {
+        --orange: @(b?.ButtonColor ?? "#F58220");
+        --bg: @(b?.BackgroundColor ?? "#F5F5F5");
+        --orange-dark: @(b?.ButtonColor ?? "#F58220");
+    }
+</style>
+
+<div class="login-page">
+    <div class="login-wrap">
+        <div class="login-logo-wrap">
+            <img src="@(ViewBag.Branding is AttendUp.Mvc.Models.Setting b2 && b2.LogoPath != null ? b2.LogoPath : "/images/logo.png")" alt="AttendUp logo" class="login-logo-img" />
+        </div>
+
+        <div>
+            <form method="post" asp-controller="Registration" asp-action="Create" class="login-card" id="reg-form">
+                <h2>Invullen aanwezigheid</h2>
+                <p class="lead">Vul je gegevens in om in te checken.</p>
+
+                <input type="hidden" name="TrainingID" value="@Model?.TrainingID" />
+                <input type="hidden" name="LocationId" value="@Model?.LocationId" />
+
+                <div class="field">
+                    <label for="FirstName">Voornaam</label>
+                    <input type="text" id="FirstName" name="FirstName" class="input no-icon" placeholder="Voornaam" value="@Model?.FirstName" required />
+                </div>
+
+                <div class="field">
+                    <label for="LastName">Naam</label>
+                    <input type="text" id="LastName" name="LastName" class="input no-icon" placeholder="Achternaam" value="@Model?.LastName" required />
+                </div>
+
+                <div class="field">
+                    <label for="SubActivityID">Selecteer activiteit</label>
+                    <select name="SubActivityID" id="SubActivityID" class="select" required>
+                        <option value="" disabled selected>Kies activiteit</option>
+                        @foreach (var item in Model.SubActivities)
+                        {
+                            <option value="@item.ID">@item.Name</option>
+                        }
+                    </select>
+                </div>
+
+                @if (Model.FamilyGroups.Any())
+                {
+                    <div class="divider">Familie leden</div>
+                    @foreach (var family in Model.FamilyGroups)
+                    {
+                        <div class="reg-family-block">
+                            <div class="reg-family-header" onclick="toggleFamily(@family.FamilyId)">
+                                <span>@family.FamilyName</span>
+                                <span id="arrow-@family.FamilyId">▼</span>
+                            </div>
+                            <div class="reg-family-body" id="family-body-@family.FamilyId">
+                                @foreach (var member in family.Members)
+                                {
+                                    <button type="button"
+                                            class="reg-member-btn"
+                                            id="mbtn-@family.FamilyId-@member.MemberId"
+                                            onclick="toggleMember(@family.FamilyId, @member.MemberId, '@Html.Raw(member.FirstName.Replace("'", "\\'"))', '@Html.Raw(member.LastName.Replace("'", "\\'"))')">
+                                        @member.FirstName @member.LastName
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+
+                <div class="divider">Extra personen</div>
+
+                <div id="added-persons-list"></div>
+
+                <button type="button" class="reg-btn-add-manual" onclick="addManualPerson()">+ Persoon handmatig toevoegen</button>
+
+                <div id="extra-persons-inputs"></div>
+
+                <button class="btn btn-primary" type="submit" style="margin-top: 8px;">Bevestigen</button>
+            </form>
+        </div>
+
+        @if (b != null && !string.IsNullOrEmpty(b.EventBannerPath))
+        {
+            <div class="event-banner-wrap">
+                <img src="@b.EventBannerPath?v=@DateTime.Now.Ticks" alt="Event banner" class="event-banner-img" />
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    const subActivities = @Json.Serialize(Model.SubActivities.Select(s => new { id = s.ID, name = s.Name }));
+</script>
+<script src="~/js/registration.js"></script>

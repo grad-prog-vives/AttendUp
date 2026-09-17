@@ -1,0 +1,64 @@
+﻿@{
+    ViewBag.Title = "Ledenoverzicht";
+}
+
+<main class="main">
+    <h1>Ledenoverzicht</h1>
+
+    <section class="table-card">
+        <div class="table-head">
+            <h3>Leden</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Naam lid</th>
+                    <th>Trainingssessies</th>
+                    <th>Activiteitsniveau</th>
+                    <th>Laatst actief</th>
+                    <th>Acties</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model.TopMembers)
+                {
+                    <tr>
+                        @{
+                            var FirstName = char.ToUpper(m.FirstName[0]);
+                            var LastName = char.ToUpper(m.LastName[0]);
+                        }
+                        <td><div class="member"><span class="avatar">@FirstName@LastName</span> @m.FirstName @m.LastName</div></td>
+                        <td>@m.RegistrationCount sessies</td>
+                        <td><span class="badge badge-high">Hoog</span></td>
+                        <td>
+
+                            @{
+                                var date = m.LastActive.Date;
+                                var today = DateTime.Today;
+
+                                string formatted;
+
+                                if (date == today)
+                                {
+                                    formatted = $"Vandaag, {m.LastActive:hh:mm tt}";
+                                }
+                                else if (date == today.AddDays(-1))
+                                {
+                                    formatted = $"Gisteren, {m.LastActive:hh:mm tt}";
+                                }
+                                else
+                                {
+                                    formatted = m.LastActive.ToString("MMM dd, hh:mm tt");
+                                }
+                                formatted = char.ToUpper(formatted[0]) + formatted.Substring(1);
+                            }
+
+                                @formatted
+                        </td>
+                        <td><button class="action-btn">&#8942;</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</main>

@@ -1,0 +1,78 @@
+@model List<AttendUp.Mvc.Models.Location>
+
+@{
+    if (TempData["ErrorMessage"] is string msg)
+    {
+        ViewData.ModelState.AddModelError(string.Empty, msg);
+    }
+    ViewBag.Title = "Locaties";
+}
+
+<main class="main">
+    <div class="page-header">
+        <h1>Locaties</h1>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+            </div>
+        }
+
+        <a asp-controller="Location" asp-action="LocationCreate" class="btn btn-primary btn-sm">+ Nieuwe locatie</a>
+    </div>
+
+    <section class="section-card">
+        <div class="section-card__head">
+            <h3>Alle locaties</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Naam</th>
+                    <th>Status</th>
+                    <th>Acties</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var l in Model)
+                {
+                    <tr>
+                        <td>@l.Name</td>
+                        <td>
+                            @if (l.IsActive)
+                            {
+                                <span class="badge badge-high">Actief</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-low">Inactief</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-controller="Location" asp-action="QrCode" asp-route-id="@l.Id" class="edit-link">QR-code</a>
+                            &nbsp;|&nbsp;
+                            <a href="/Registration?locationId=@l.Id" class="edit-link">Registratie</a>
+                            &nbsp;|&nbsp;
+                            <a asp-controller="Location" asp-action="LocationEdit" asp-route-id="@l.Id" class="edit-link">Bewerken</a>
+                            &nbsp;|&nbsp;
+                            <form asp-controller="Location" asp-action="LocationToggle" asp-route-id="@l.Id" method="post" style="display:inline;">
+                                <button type="submit" class="activity-tag" style="background:none;border:none;cursor:pointer;padding:0;">
+                                    @(l.IsActive ? "Deactiveren" : "Activeren")
+                                </button>
+                            </form>
+                            &nbsp;|&nbsp;
+                            <form asp-controller="Location" asp-action="LocationDelete" asp-route-id="@l.Id" method="post" style="display:inline;">
+                                <button type="submit" onclick="return confirm('Locatie verwijderen?')"
+                                        style="background:none;border:none;cursor:pointer;color:var(--red);font-weight:600;font-size:13px;padding:0;">Verwijderen</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</main>

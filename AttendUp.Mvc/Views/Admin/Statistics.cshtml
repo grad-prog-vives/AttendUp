@@ -1,0 +1,143 @@
+﻿@{
+    ViewBag.Title = "Statistieken";
+}
+
+<div class="main">
+    <div class="page-header">
+        <h1>Statistieken</h1>
+        <div class="page-actions">
+            <a asp-controller="Admin" asp-action="Export" class="btn btn-primary btn-sm">&#11015; Exporteren</a>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-head">
+                <span>Totaal aantal leden</span>
+            </div>
+            <p class="stat-value">@Model.TotalMembers</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-head">
+                <span>Actief deze maand</span>
+            </div>
+            <p class="stat-value">@Model.ActiveMembersThisMonth</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-head">
+                <span>Gemiddelde aanwezigheid</span>
+            </div>
+            <p class="stat-value">@Model.AveragePerTraining <span style="font-size:13px; color: var(--muted); font-weight: 500;">per sessie</span></p>
+        </div>
+    </div>
+    @{
+        var data = (IEnumerable<dynamic>)Model.ActiveMembersPerMonth;
+        var max = data.Max(x => (int)x.ActiveMembers);
+
+        var colors = new[] { "bar-brown", "bar-dark", "bar-orange" };
+        var i = 0;
+    }
+
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-card__head">
+                <div class="chart-card__title">Gemiddelde leden<br />per maand</div>
+                <div>
+                    <div class="chart-card__value">
+                        @{
+                            int totalMembers = 0;
+                        }
+                        @foreach (var m in data) {
+                            totalMembers = totalMembers + m.ActiveMembers;
+                        }
+                        @totalMembers
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="bar-chart">
+                @foreach (var m in data)
+                {
+                    var height = max == 0 ? 0 : (m.ActiveMembers * 100 / max);
+                    var color = colors[i % colors.Length];
+
+                    if (height == 0)
+                    {
+                        height = 100;
+                        color = "bar-inactive";
+                    }
+
+                    <div class="bar @color" style="height:@height%">
+                        <span class="bar-val">@m.ActiveMembers</span>
+                    </div>
+
+                    i++;
+                }
+            </div>
+            <div class="bar-labels">
+                @foreach (var m in data)
+                {
+                    <span>@m.Month</span>
+                }
+            </div>
+
+
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-card__head">
+                <div class="chart-card__title">Totale registraties per subactiviteit</div>
+            </div>
+            <div class="hbar-list">
+
+                @{
+                    var data2 = (IEnumerable<dynamic>)Model.SubActivities;
+                    var max2 = data2.Max(x => (int)x.AttendanceCount);
+                }
+
+                @foreach (var m in data2)
+                {
+                    var height2 = max2 == 0 ? 0 : (m.AttendanceCount * 100 / max2);
+                    <div class="hbar-row">
+                        <div class="hbar-label"><span>@m.Name</span><span class="num">@m.AttendanceCount</span></div>
+                        <div class="hbar-track"><div class="hbar-fill" style="width: @height2%;"></div></div>
+                    </div>
+                    
+                }
+            </div>
+        </div>
+    </div>
+
+    <section class="table-card">
+        <div class="table-head">
+            <h3>Top 10 meest actieve leden</h3>
+            <a asp-controller="Admin" asp-action="ViewAllMembers" class="btn btn-primary btn-sm">Meer Tonen</a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Plaats</th>
+                    <th>Deelnemer</th>
+                    <th>Activiteiten</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @{
+                    int TopMember = 1;
+                }
+                @foreach (var m in Model.TopMembers)
+                {
+                    <tr>
+                        <td><span class="rank">@TopMember</span></td>
+                        <td><div class="member"><span class="avatar">@m.FirstName[0]@m.LastName[0]</span><div>@m.FirstName @m.LastName</div></div></td>
+                        <td>@m.RegistrationCount</td>
+                    </tr>
+                    TopMember++;
+                }
+
+            </tbody>
+        </table>
+    </section>
+</div>

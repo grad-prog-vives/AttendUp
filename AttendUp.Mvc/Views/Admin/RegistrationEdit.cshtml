@@ -1,0 +1,76 @@
+﻿@model AttendUp.Mvc.ViewModels.EditRegistrationViewModel
+@{
+    ViewBag.Title = "Registratie corrigeren";
+}
+
+<div class="main training-create-page">
+    <form class="training-modal registration-edit-modal" method="post"
+          asp-controller="Admin"
+          asp-action="EditRegistration"
+          asp-route-id="@Model.ID">
+
+        @Html.AntiForgeryToken()
+
+        <div class="training-modal__header">
+            <h2 class="training-modal__title">Registratie corrigeren</h2>
+            <button type="button" class="training-modal__close"
+                    onclick="window.location.href='/Admin/Registrations';">
+                &times;
+            </button>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+            </div>
+        }
+
+        <input type="hidden" asp-for="ID" />
+
+        <div class="field">
+            <label asp-for="FirstName">Voornaam</label>
+            <input type="text" class="input no-icon" asp-for="FirstName" required />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="LastName">Achternaam</label>
+            <input type="text" class="input no-icon" asp-for="LastName" required />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="SubActivityID">Subactiviteit</label>
+            <select class="input no-icon" asp-for="SubActivityID" required>
+                <option value="">-- Kies een subactiviteit --</option>
+                @foreach (var option in Model.AvailableSubActivities)
+                {
+                    <option value="@option.ID">@option.Name</option>
+                }
+            </select>
+            <span asp-validation-for="SubActivityID" class="text-danger"></span>
+        </div>
+
+        <div class="field">
+            <label asp-for="RegisteredAt">Datum &amp; tijdstip</label>
+            <input type="datetime-local" class="input no-icon"
+                   name="RegisteredAt"
+                   value="@Model.RegisteredAt.ToString("yyyy-MM-ddTHH:mm")"
+                   required />
+            <span asp-validation-for="RegisteredAt" class="text-danger"></span>
+        </div>
+
+        <div class="training-modal__actions">
+            <button type="button" class="btn btn-outline"
+                    onclick="window.location.href='/Admin/Registrations';">
+                Annuleer
+            </button>
+            <button type="submit" class="btn btn-primary">Opslaan</button>
+        </div>
+
+    </form>
+</div>

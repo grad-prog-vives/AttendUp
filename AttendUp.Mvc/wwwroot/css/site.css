@@ -1,0 +1,60 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+.register-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.register-logo {
+    width: 220px;
+    margin-bottom: 24px;
+}
+
+.register-form {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(200, 200, 200, 0.5);
+    border-radius: 12px;
+    padding: 2rem;
+    min-width: 300px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.btn-register, .btn-register:hover {
+    background-color: orange;
+    border: none;
+    color: white;
+}

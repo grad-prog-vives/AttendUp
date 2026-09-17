@@ -1,0 +1,196 @@
+@model IEnumerable<AttendUp.Mvc.ViewModels.AdminUserViewModel>
+
+@{
+    ViewData["Title"] = "Superadmin Account Management";
+}
+
+<main class="main">
+    <h1>Account beheer</h1>
+    <p class="users-muted-text">
+        Als superadmin kan ik accounts van bestuursleden bekijken, toevoegen en verwijderen, of hun gegevens en wachtwoord herstellen.
+    </p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success mb-3">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger mb-3">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <section class="table-card users-add-card">
+        <h3>Nieuw bestuurslid toevoegen</h3>
+        <form asp-action="CreateUser" method="post" class="d-flex gap-3 flex-wrap align-items-start">
+            <div class="users-form-field flex-grow-1">
+                <label class="form-label">Voornaam</label>
+                <input type="text" name="firstName" class="attendup-input" placeholder="Bijv. Jan" required />
+            </div>
+            <div class="users-form-field flex-grow-1">
+                <label class="form-label">Achternaam</label>
+                <input type="text" name="lastName" class="attendup-input" placeholder="Bijv. Janssens" required />
+            </div>
+            <div class="users-form-field flex-grow-1">
+                <label class="form-label">E-mailadres</label>
+                <input type="email" name="email" class="attendup-input" placeholder="bestuurslid@attendup.com" required />
+            </div>
+            <div class="users-form-field flex-grow-1">
+                <label class="form-label">Tijdelijk wachtwoord</label>
+                <input type="password" name="password" class="attendup-input" placeholder="Minimaal 6 tekens" required />
+            </div>
+            <div class="users-form-submit flex-grow-0">
+                <button type="submit" class="btn btn-primary">+ Lid toevoegen</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="table-card">
+        <div class="table-head">
+            <h3>Geregistreerde bestuursleden</h3>
+            <div class="users-role-filters">
+                <button type="button" class="users-filter-btn active" data-filter="all">Alle</button>
+                <button type="button" class="users-filter-btn" data-filter="SuperAdmin">SuperAdmin</button>
+                <button type="button" class="users-filter-btn" data-filter="Admin">Admin</button>
+                <button type="button" class="users-filter-btn" data-filter="Member">Member</button>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Bestuurslid (Naam / E-mail)</th>
+                    <th>Gebruikers-ID</th>
+                    <th>Rol</th>
+                    <th>Actie (Gegevens wijzigen / Wachtwoord)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var user = item.User;
+                    <tr data-role="@item.Role">
+                        <td>
+                            <div class="member">
+                                @{
+                                    string username = "Onbekende Gebruiker";
+
+                                    if (!string.IsNullOrEmpty(user.UserName) && user.UserName.Contains('.'))
+                                    {
+                                        var parts = user.UserName.Split('.');
+                                        if (parts.Length >= 2)
+                                        {
+                                            var firstName = char.ToUpper(parts[0][0]) + parts[0].Substring(1).ToLower();
+                                            var lastName = char.ToUpper(parts[1][0]) + parts[1].Substring(1).ToLower();
+                                            username = $"{firstName} {lastName}";
+                                        }
+                                    }
+                                    else if (!string.IsNullOrEmpty(user.UserName))
+                                    {
+                                        username = char.ToUpper(user.UserName[0]) + user.UserName.Substring(1).ToLower();
+                                    }
+                                }
+                                <div>
+                                    <strong>@username</strong><br />
+                                    <span class="users-member-email">@user.Email</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="users-table-id">@user.Id</td>
+                        <td>
+                            @if (item.IsSuperAdmin)
+                            {
+                                <span class="badge bg-warning text-dark">SuperAdmin</span>
+                            }
+                            else
+                            {
+                                <form asp-action="ChangeRole" method="post" class="d-flex gap-2 align-items-center">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@user.Id" />
+                                    @{
+                                        var opts = item.Role == "Admin"
+                                            ? "<option value=\"Admin\" selected=\"selected\">Admin</option><option value=\"Member\">Member</option>"
+                                            : "<option value=\"Admin\">Admin</option><option value=\"Member\" selected=\"selected\">Member</option>";
+                                    }
+                                    <select name="newRole" class="attendup-input attendup-input-sm">@Html.Raw(opts)</select>
+                                    <button type="submit" class="btn btn-primary btn-sm">Opslaan</button>
+                                </form>
+                            }
+                        </td>
+                        <td class="users-table-actions">
+                            <form asp-action="EditUser" method="post" class="d-flex gap-2 flex-wrap align-items-center">
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <div class="users-table-actions-field">
+                                    <input type="email" name="newEmail" value="@user.Email" class="attendup-input attendup-input-sm" placeholder="E-mailadres" required />
+                                </div>
+                                <div class="users-table-actions-field-sm">
+                                    <input type="password" name="newPassword" class="attendup-input attendup-input-sm" placeholder="Nieuw wachtwoord (optioneel)" />
+                                </div>
+                                <div class="users-table-actions-save d-flex gap-2 align-items-center">
+                                    <button type="submit" class="btn btn-primary btn-sm">Opslaan</button>
+                                    @if (!item.IsSuperAdmin)
+                                    {
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                                onclick="if(confirm('Weet je absoluut zeker dat je @user.Email wilt verwijderen?')) document.getElementById('del-@user.Id').submit();">
+                                            &#128465;
+                                        </button>
+                                    }
+                                </div>
+                            </form>
+                            @if (!item.IsSuperAdmin)
+                            {
+                                <form id="del-@user.Id" asp-action="DeleteUser" method="post" style="display:none">
+                                    <input type="hidden" name="userId" value="@user.Id" />
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<style>
+    .users-role-filters {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .users-filter-btn {
+        padding: 0.3rem 0.9rem;
+        border: 2px solid var(--orange, #F58220);
+        border-radius: 999px;
+        background: transparent;
+        color: var(--orange, #F58220);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+    }
+
+    .users-filter-btn:hover,
+    .users-filter-btn.active {
+        background: var(--orange, #F58220);
+        color: #fff;
+    }
+</style>
+
+<script>
+    document.querySelectorAll('.users-filter-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.users-filter-btn').forEach(function (b) {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+
+            var filter = btn.getAttribute('data-filter');
+            document.querySelectorAll('tbody tr[data-role]').forEach(function (row) {
+                row.style.display = (filter === 'all' || row.getAttribute('data-role') === filter) ? '' : 'none';
+            });
+        });
+    });
+</script>
