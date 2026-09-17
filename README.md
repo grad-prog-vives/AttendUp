@@ -1,4 +1,4 @@
-# Groepsopdracht werkplekleren 1
+# AttendUp
 
 # Registratie
 Surf naar https://localhost:7163 en meld je aan.
