@@ -30,20 +30,10 @@ jobs:
     - name: Publish
       run: dotnet publish --configuration Release --output ./publish
 
-    # - name: FTP Deploy
-    #   uses: SamKirkland/FTP-Deploy-Action@v4.4.0
-    #   with:
-    #     server: ${{ secrets.FTP_SERVER }}
-    #     username: ${{ secrets.FTP_USERNAME }}
-    #     password: ${{ secrets.FTP_PASSWORD }}
-    #     local-dir: ./publish/
-    #     protocol: ftps
-
-    - name: Deploy via SFTP
-      uses: Dylan700/sftp-upload-action@latest
+    - name: FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@v4.4.0
       with:
-        server: ${{ secrets.FTP_SERVER}}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        port: 21
-        uploads: ./publish/ => /
+        server: windowsftp.webhosting.be
+        username: attendup@mysites.be
+        password: joske1234?
+        local-dir: ./publish/
