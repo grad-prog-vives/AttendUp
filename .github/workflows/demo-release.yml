@@ -33,7 +33,8 @@ jobs:
     - name: FTP Deploy
       uses: SamKirkland/FTP-Deploy-Action@v4.4.0
       with:
-        server: windowsftp.webhosting.be
-        username: attendup@mysites.be
-        password: joske1234?
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./publish/
+        protocol: ftps
