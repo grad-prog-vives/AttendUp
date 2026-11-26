@@ -18,26 +18,18 @@ namespace AttendUp.Mvc.Controllers
         {
             LoadSettings();
 
-            if (locationId == null || !_context.Locations.Any(l => l.Id == locationId && l.IsActive))
-            {
-                var today2 = DateTime.Today;
-                var nextTraining2 = _context.Trainings
-                    .Where(t => t.Date.Date > today2 && t.IsActive)
-                    .OrderBy(t => t.Date)
-                    .FirstOrDefault();
-
-                var scanAgainVm = new NotFoundViewModel
-                {
-                    NextTrainingDate = nextTraining2?.Date,
-                    NextTrainingStartTime = nextTraining2?.StartTime,
-                    NextTrainingEndTime = nextTraining2?.EndTime,
-                };
-                return View("ScanAgain", scanAgainVm);
-            }
-
             var today = DateTime.Today;
             var now = DateTime.Now;
-            var training = _context.Trainings.Include(t => t.TrainingSubActivities).ThenInclude(tsa => tsa.SubActivity).FirstOrDefault(t => t.Date.Date == today && t.IsActive);
+
+            if (locationId == null || !_context.Locations.Any(l => l.Id == locationId && l.IsActive))
+            {
+                return View("ScanAgain", BuildNextTrainingViewModel(today));
+            }
+
+            var training = _context.Trainings
+                .Include(t => t.TrainingSubActivities)
+                .ThenInclude(tsa => tsa.SubActivity)
+                .FirstOrDefault(t => t.Date.Date == today && t.IsActive);
 
             if (training == null)
             {
@@ -59,13 +51,13 @@ namespace AttendUp.Mvc.Controllers
             if (now < windowOpen)
             {
                 ViewBag.OpeningTime = windowOpen.ToString("HH:mm");
-                return View("TooEarly");
+                return View("TooEarly", BuildNextTrainingViewModel(today));
             }
 
             // Te laat
             if (now > windowClosed)
             {
-                return View("TooLate");
+                return View("TooLate", BuildNextTrainingViewModel(today));
             }
 
             // Binnen de tijd! Toon het formulier
@@ -109,7 +101,6 @@ namespace AttendUp.Mvc.Controllers
         {
             var training = _context.Trainings.FirstOrDefault(t => t.ID == vm.TrainingID);
 
-
             if (training == null || !training.IsActive)
             {
                 LoadSettings();
@@ -131,18 +122,20 @@ namespace AttendUp.Mvc.Controllers
             {
                 return RedirectToAction("Index");
             }
+
             // IP-logic
             string? ipAddress = null;
-            if (settings != null && settings.StoreIpAddresses) // 
+            if (settings != null && settings.StoreIpAddresses)
             {
                 ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
 
-                // Check , reverse proxies (IIS, Nginx of Cloudflare)
+                // Check reverse proxies (IIS, Nginx of Cloudflare)
                 if (HttpContext.Request.Headers.ContainsKey("X-Forwarded-For"))
                 {
                     ipAddress = HttpContext.Request.Headers["X-Forwarded-For"].ToString();
                 }
             }
+
             _context.Registrations.Add(new Registration
             {
                 TrainingID = vm.TrainingID,
@@ -152,7 +145,7 @@ namespace AttendUp.Mvc.Controllers
                 SubActivityID = vm.SubActivityID,
                 IsValid = true,
                 RegisteredAt = now,
-                IpAddress = ipAddress 
+                IpAddress = ipAddress
             });
 
             if (vm.ExtraPersons != null)
@@ -181,33 +174,39 @@ namespace AttendUp.Mvc.Controllers
             return RedirectToAction("Success");
         }
 
+        public IActionResult Success()
+        {
+            LoadSettings();
+            return View();
+        }
+
         private IActionResult ShowNotFound(DateTime today)
         {
             LoadSettings();
+
+            var todayDeactivated = _context.Trainings.FirstOrDefault(t =>
+                t.Date.Date == today && !t.IsActive);
+
+            var notFoundVm = BuildNextTrainingViewModel(today);
+            notFoundVm.TodayTrainingDeactivated = todayDeactivated != null;
+            notFoundVm.DeactivationReason = todayDeactivated?.DeactivationReason;
+
+            return View("NotFound", notFoundVm);
+        }
+
+        private NotFoundViewModel BuildNextTrainingViewModel(DateTime today)
+        {
             var nextTraining = _context.Trainings
                 .Where(t => t.Date.Date > today && t.IsActive)
                 .OrderBy(t => t.Date)
                 .FirstOrDefault();
 
-            var todayDeactivated = _context.Trainings.FirstOrDefault(t =>
-                 t.Date.Date == today && !t.IsActive);
-
-            var notFoundVm = new NotFoundViewModel
+            return new NotFoundViewModel
             {
                 NextTrainingDate = nextTraining?.Date,
                 NextTrainingStartTime = nextTraining?.StartTime,
-                NextTrainingEndTime = nextTraining?.EndTime,
-                TodayTrainingDeactivated = todayDeactivated != null,
-                DeactivationReason = todayDeactivated?.DeactivationReason,
+                NextTrainingEndTime = nextTraining?.EndTime
             };
-
-            return View("NotFound", notFoundVm);
-        }
-
-        public IActionResult Success()
-        {
-            LoadSettings();
-            return View();
         }
     }
 }

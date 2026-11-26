@@ -1,4 +1,5 @@
-﻿@{
+﻿@model AttendUp.Mvc.ViewModels.NotFoundViewModel
+@{
     var b = ViewBag.Branding as AttendUp.Mvc.Models.Setting;
 }
 <style>
@@ -18,6 +19,8 @@
             <h2>Registratie Gesloten</h2>
             <p>Registreren is niet meer mogelijk.</p>
         </div>
+
+        <partial name="_NextTraining" model="Model" />
 
         @if (b != null && !string.IsNullOrEmpty(b.EventBannerPath))
         {
