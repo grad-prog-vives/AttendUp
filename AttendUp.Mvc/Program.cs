@@ -111,7 +111,8 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 // Automatisch updaten van migration bij runnen project
-
+if (!app.Environment.IsDevelopment())
+{
     using (var scope = app.Services.CreateScope())
     {
         var services = scope.ServiceProvider;
@@ -121,6 +122,6 @@ app.MapControllerRoute(
 
         await DbSeeder.SeedIdentityAsync(services);
     }
-
+}
 
 app.Run();
