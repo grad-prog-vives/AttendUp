@@ -111,7 +111,7 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 // Automatisch updaten van migration bij runnen project
-if(!app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
     using (var scope = app.Services.CreateScope())
     {
